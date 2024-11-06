@@ -1,0 +1,887 @@
+<html><head><base href="https://www.flixhub.com">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skibidi Rizzler - Streaming Movies and TV Shows</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    body {
+      background: url('https://wallpapers.com/images/featured/cinnamoroll-laptop-4bjmy64xlmau32vy.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #005b99;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 15px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .logo {
+      margin-right: 10px;
+    }
+    h1 {
+      background: url('https://www.adinata.com/media/character/647296cn.png') center/cover;
+      width: 200px; /* Add fixed width */
+      height: 60px; /* Add fixed height */
+      margin: 0;
+      font-size: 0; /* Hide text content */
+      padding: 0;
+    }
+    nav {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      align-items: center;
+    }
+    .nav-bottom {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+    .nav-bottom button {
+      margin: 0 10px;
+      background: linear-gradient(to bottom, #0099ff, #005b99);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .nav-bottom button:hover {
+      background: linear-gradient(to bottom, #00b3ff, #0066cc);
+    }
+    .language-toggle {
+      background-color: transparent !important;
+      border: 1px solid #005b99 !important;
+      color: #005b99;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 25px;
+    }
+    .search-container {
+      display: flex;
+      margin-bottom: 30px;
+      align-items: center;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 25px;
+      padding: 0;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      height: 50px; 
+    }
+    #searchInput {
+      flex-grow: 1;
+      padding: 0 20px;
+      font-size: 1rem;
+      border: none;
+      background: transparent;
+      color: #005b99;
+      outline: none;
+      height: 100%; 
+      border-radius: 25px 0 0 25px;
+    }
+    #searchInput::placeholder {
+      color: rgba(0, 91, 153, 0.5);
+    }
+    #searchButton {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(to right, #005b99, #0099ff);
+      color: #fff;
+      border: none;
+      padding: 0 25px;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 0 25px 25px 0;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      margin-left: 0;
+      height: 100%;
+      width: 100px; 
+    }
+    #searchButton:hover {
+      background: linear-gradient(to right, #0066cc, #00b3ff);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+    .media-section {
+      margin-bottom: 40px;
+    }
+    .media-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    .media-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 5px;
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+    .media-item:hover {
+      transform: scale(1.05);
+    }
+    .media-item img {
+      width: 100%;
+      height: auto;
+    }
+    .rating-badge, .media-year {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .media-item:hover .rating-badge,
+    .media-item:hover .media-year {
+      opacity: 1;
+    }
+    .media-info {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      color: #005b99;
+    }
+    .media-item:hover .media-info {
+      transform: translateY(0);
+    }
+    .media-title {
+      margin: 0;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding-right: 60px; 
+    }
+    .media-rating {
+      font-size: 0.8rem;
+      color: #ffd700;
+      margin: 3px 0;
+    }
+    .media-details {
+      font-size: 0.7rem;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1001;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+      background-color: white;
+      margin: 0;
+      padding: 20px;
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      animation: modalFadeIn 0.3s ease;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .close:hover,
+    .close:focus {
+      color: #fff;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .video-container {
+      position: relative;
+      width: 100%;
+      height: 70vh;
+      background: #000;
+      margin-bottom: 20px;
+    }
+    #player {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    #subtitlesOverlay {
+      position: absolute;
+      bottom: 50px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: #fff;
+      font-size: 20px;
+      text-shadow: 0 0 3px #000;
+      z-index: 1000;
+      pointer-events: none;
+    }
+    #mediaInfo {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,91,153,0.1);
+      animation: fadeUp 0.5s ease;
+      font-family: 'Roboto', sans-serif;
+    }
+    #seasonEpisodeSelection {
+      margin: 10px 0;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 5px;
+      display: none; /* Hidden by default */
+    }
+    #seasonEpisodeSelection select {
+      margin: 0 10px;
+      padding: 5px 10px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #005b99;
+      border: 1px solid rgba(0, 91, 153, 0.3);
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    footer {
+      text-align: center;
+      padding: 10px;
+      color: #005b99;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+    .similar-media-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .similar-item {
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    .similar-item:hover {
+      transform: scale(1.05);
+    }
+    .similar-item img {
+      width: 100%;
+      border-radius: 4px;
+    }
+    .similar-item p {
+      margin: 5px 0;
+      font-size: 14px;
+      text-align: center;
+    }
+    .age-rating {
+      display: inline-block;
+      background: #333;
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    .play-buttons {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .play-buttons button {
+      padding: 10px 20px;
+      background: linear-gradient(to right, #005b99, #0099ff);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .play-buttons button:hover {
+      background: linear-gradient(to right, #0066cc, #00b3ff);
+      transform: scale(1.05);
+    }
+    .media-year {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      z-index: 2;
+    }
+    .media-details-info {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 15px;
+      border-radius: 5px;
+      margin: 15px 0;
+    }
+    .media-details-info p {
+      margin: 5px 0;
+    }
+    .media-details-info strong {
+      color: #0099ff;
+    }
+    .back-button {
+      background: transparent;
+      border: 1px solid #005b99;
+      color: #005b99;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-bottom: 15px;
+      transition: all 0.3s ease;
+    }
+    .back-button:hover {
+      background: rgba(0, 91, 153, 0.1);
+    }
+    .video-container video {
+      width: 100%;
+      height: 100%;
+      background: #000;
+      object-fit: contain;
+    }
+    .video-container video::-webkit-media-controls {
+      background-color: rgba(0, 91, 153, 0.5);
+    }
+    .video-container video::-webkit-media-controls-panel {
+      background-color: rgba(255, 255, 255, 0.8);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-top">
+        <img src="https://tr.rbxcdn.com/180DAY-488027dd31c39165cad9ed8eb2440ab7/420/420/Hat/Webp/noFilter" 
+             alt="Skibidi Rizzler Logo"
+             class="logo"
+             width="60" 
+             height="60">
+        <h1>Skibidi Rizzler</h1>
+      </div>
+      <nav>
+        <div class="nav-bottom">
+          <button id="moviesButton">Movies</button>
+          <button id="tvShowsButton">TV Shows</button>
+          <select id="languageSelect" class="language-toggle">
+            <option value="en-US">English</option>
+          </select>
+        </div>
+      </nav>
+    </header>
+
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="Search for a cute movie or tv show...">
+      <button id="searchButton">:D</button>
+    </div>
+
+    <section class="media-section">
+      <div id="popularMovies" class="media-grid"></div>
+    </section>
+  </div>
+
+  <div id="playerModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div class="video-container">
+        <video id="player" controls preload="auto" poster="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif">
+          <p>Your browser doesn't support HTML5 video.</p>
+        </video>
+      </div>
+      <div id="mediaInfo"></div>
+      <div id="seasonEpisodeSelection" style="display: none;">
+        <select id="seasonSelect"></select>
+        <select id="episodeSelect"></select>
+      </div>
+    </div>
+  </div>
+  <div class="overlay"></div>
+
+  <script>
+    let previousMediaId = null;
+    let previousMediaType = null;
+
+    const TMDB_API_KEY = 'b2496ed57cdbfafa83046256d56f9f02';
+    const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+    const CACHE_DURATION = 96 * 60 * 60 * 1000;
+
+    let displayedMediaIds = new Set();
+
+    const API_KEY = 'b2496ed57cdbfafa83046256d56f9f02';
+    const BASE_URL = 'https://api.themoviedb.org/3';
+    const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+    const OPENSUBTITLES_API_URL = 'https://api.opensubtitles.com/api/v1';
+    const OPENSUBTITLES_API_KEY = 'j0qG1cwrrkkE2yauA2huvCrOK5N0r7eY';
+    const USER_AGENT = 'FlixHub v1.0';
+
+    let currentLanguage = 'en-US';
+    let currentMediaType = 'movie';
+    let currentPage = 1;
+    let isLoading = false;
+    let currentMediaId = null;
+
+    const translations = {
+      'pt-BR': {
+        'Skibidi Rizzler': 'Skibidi Rizzler',
+        'Movies': 'Filmes',
+        'TV Shows': 'Séries',
+        'Search': 'Buscar'
+      },
+      'es': {
+        'Skibidi Rizzler': 'Skibidi Rizzler',
+        'Movies': 'Películas', 
+        'TV Shows': 'Series',
+        'Search': 'Buscar'
+      }
+    };
+
+    async function goBackToPrevious() {
+      if (previousMediaId && previousMediaType) {
+        try {
+          const mediaDetails = await fetchMediaDetails(previousMediaId, previousMediaType);
+          if (mediaDetails) {
+            const tempCurrentId = currentMediaId;
+            const tempCurrentType = currentMediaType;
+            currentMediaId = previousMediaId;
+            currentMediaType = previousMediaType;
+            previousMediaId = tempCurrentId;
+            previousMediaType = tempCurrentType;
+            await showMediaDetails(mediaDetails, previousMediaType);
+          }
+        } catch (error) {
+          console.error('Error going back to previous media:', error);
+        }
+      } else {
+        closeModal();
+      }
+    }
+    
+    async function closeModal() {
+      try {
+        const modal = document.getElementById('playerModal');
+        const videoContainer = document.querySelector('.video-container');
+        const player = document.getElementById('player');
+        
+        if (modal) {
+          modal.style.display = 'none';
+        }
+        
+        if (videoContainer) {
+          videoContainer.style.display = 'none';
+          videoContainer.innerHTML = `
+            <video id="player" controls preload="auto" poster="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif">
+              <p>Your browser doesn't support HTML5 video.</p>
+            </video>
+          `;
+        }
+      } catch (error) {
+        console.error('Error closing modal:', error);
+      }
+    }
+
+    async function fetchMedia(endpoint, params = {}) {
+      try {
+        const response = await axios.get(`${TMDB_BASE_URL}${endpoint}`, {
+          params: {
+            api_key: TMDB_API_KEY,
+            language: currentLanguage,
+            ...params
+          }
+        });
+        return response.data.results;
+      } catch (error) {
+        console.error('Error fetching media:', error);
+        return [];
+      }
+    }
+
+    async function performSearch(query) {
+      try {
+        const [movieResults, tvResults] = await Promise.all([
+          axios.get(`${TMDB_BASE_URL}/search/movie`, {
+            params: {
+              api_key: TMDB_API_KEY,
+              language: currentLanguage,
+              query: query,
+              include_adult: false
+            }
+          }),
+          axios.get(`${TMDB_BASE_URL}/search/tv`, {
+            params: {
+              api_key: TMDB_API_KEY,
+              language: currentLanguage, 
+              query: query,
+              include_adult: false
+            }
+          })
+        ]);
+
+        const allResults = [
+          ...movieResults.data.results.map(item => ({...item, media_type: 'movie'})),
+          ...tvResults.data.results.map(item => ({...item, media_type: 'tv'}))
+        ].sort((a, b) => b.popularity - a.popularity);
+
+        return allResults;
+      } catch (error) {
+        console.error('Error performing search:', error);
+        return [];
+      }
+    }
+
+    async function populateCarousel() {
+      try {
+        const trendingMovies = await fetchMedia('/trending/all/week', { language: currentLanguage });
+        const carouselContainer = document.querySelector('.carousel');
+        
+        if (!carouselContainer || !trendingMovies) {
+          console.error('Carousel container or trending movies not found');
+          return;
+        }
+
+        carouselContainer.innerHTML = '';
+
+        const items = [...trendingMovies, ...trendingMovies].map(movie => `
+          <div class="item">
+            <img src="${IMAGE_BASE_URL}${movie.poster_path}" 
+                 alt="${movie.title || movie.name}" 
+                 onclick="openMediaDetails(${movie.id}, '${movie.media_type}')">
+          </div>
+        `).join('');
+
+        carouselContainer.innerHTML = items;
+      } catch (error) {
+        console.error('Error populating carousel:', error);
+      }
+    }
+
+    async function openMediaDetails(id, mediaType = 'movie') {
+      previousMediaId = currentMediaId;
+      previousMediaType = currentMediaType;
+      
+      currentMediaId = id;
+      currentMediaType = mediaType;
+
+      try {
+        const mediaDetails = await fetchMediaDetails(id, mediaType);
+        if (mediaDetails) {
+          await showMediaDetails(mediaDetails, mediaType);
+        }
+      } catch (error) {
+        console.error('Error opening media details:', error);
+      }
+    }
+
+    async function fetchMediaDetails(id, mediaType) {
+      try {
+        const response = await axios.get(`${BASE_URL}/${mediaType}/${id}`, {
+          params: { 
+            api_key: API_KEY, 
+            language: currentLanguage, 
+            append_to_response: 'seasons,credits,production_countries' 
+          }
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching media details:', error);
+        return null;
+      }
+    }
+
+    async function showMediaDetails(mediaDetails, mediaType) {
+      if (!mediaDetails) {
+        console.error('No media details provided');
+        return;
+      }
+
+      currentMediaId = mediaDetails.id;
+
+      try {
+        const modal = document.getElementById('playerModal');
+        const mediaInfoDiv = document.getElementById('mediaInfo');
+        const videoContainer = document.querySelector('.video-container');
+        const seasonEpisodeSelection = document.getElementById('seasonEpisodeSelection');
+
+        videoContainer.style.display = 'block';
+
+        if (mediaType === 'tv') {
+          seasonEpisodeSelection.style.display = 'block';
+          await populateSeasonEpisodes(mediaDetails.id);
+        } else {
+          seasonEpisodeSelection.style.display = 'none';
+        }
+
+        let mediaContent = `
+          <h2>${mediaDetails.title || mediaDetails.name}</h2>
+          <p>${mediaDetails.overview}</p>
+          <div class="media-details-info">
+            <p><strong>⭐ Score:</strong> ${mediaDetails.vote_average.toFixed(1)} (${mediaDetails.vote_count} votes)</p>
+            <p><strong>🗓️ Year:</strong> ${(mediaDetails.release_date || mediaDetails.first_air_date || '').split('-')[0] || 'N/A'}</p>
+            <p><strong>🌍 Country:</strong> ${mediaDetails.production_countries?.map(c => c.name).join(', ') || 'N/A'}</p>
+            <p><strong>🎭 Genre:</strong> ${mediaDetails.genres?.map(g => g.name).join(', ') || 'N/A'}</p>
+            ${mediaDetails.runtime ? `<p><strong>⏱️ Duration:</strong> ${mediaDetails.runtime} min</p>` : ''}
+          </div>
+          <div class="play-buttons">
+            <button onclick="playStream('${mediaDetails.id}', '${mediaType}', 1)">VidSrc Stream</button>
+            <button onclick="playStream('${mediaDetails.id}', '${mediaType}', 2)">MoviesAPI Stream</button>
+          </div>
+          <button class="back-button" onclick="closeModal()">Close</button>
+        `;
+
+        mediaInfoDiv.innerHTML = mediaContent;
+        modal.style.display = 'block';
+      } catch (error) {
+        console.error('Error showing media details:', error);
+      }
+    }
+
+    async function populateSeasonEpisodes(tvId) {
+      try {
+        const response = await axios.get(`${TMDB_BASE_URL}/tv/${tvId}`, {
+          params: {
+            api_key: TMDB_API_KEY,
+            language: currentLanguage
+          }
+        });
+
+        const seasonSelect = document.getElementById('seasonSelect');
+        const episodeSelect = document.getElementById('episodeSelect');
+        
+        seasonSelect.innerHTML = response.data.seasons
+          .map(season => `<option value="${season.season_number}">Season ${season.season_number}</option>`)
+          .join('');
+
+        await populateEpisodes(tvId, response.data.seasons[0].season_number);
+
+        seasonSelect.addEventListener('change', async (e) => {
+          await populateEpisodes(tvId, e.target.value);
+        });
+      } catch (error) {
+        console.error('Error populating seasons:', error);
+      }
+    }
+
+    async function populateEpisodes(tvId, seasonNum) {
+      try {
+        const response = await axios.get(`${TMDB_BASE_URL}/tv/${tvId}/season/${seasonNum}`, {
+          params: {
+            api_key: TMDB_API_KEY,
+            language: currentLanguage
+          }
+        });
+
+        const episodeSelect = document.getElementById('episodeSelect');
+        episodeSelect.innerHTML = response.data.episodes
+          .map(episode => `<option value="${episode.episode_number}">Episode ${episode.episode_number}: ${episode.name}</option>`)
+          .join('');
+      } catch (error) {
+        console.error('Error populating episodes:', error);
+      }
+    }
+
+    async function playStream(mediaId, mediaType, server) {
+      try {
+        const videoContainer = document.querySelector('.video-container');
+        if (!videoContainer) {
+          console.error('Video container not found');
+          return;
+        }
+
+        const imdbData = await axios.get(`${TMDB_BASE_URL}/${mediaType}/${mediaId}/external_ids`, {
+          params: {
+            api_key: TMDB_API_KEY
+          }
+        });
+
+        const imdbId = imdbData.data.imdb_id;
+        if (!imdbId) {
+          console.error('IMDB ID not found');
+          return;
+        }
+
+        let streamUrl;
+        if (mediaType === 'tv') {
+          const seasonSelect = document.getElementById('seasonSelect');
+          const episodeSelect = document.getElementById('episodeSelect');
+          
+          if (!seasonSelect || !episodeSelect) {
+            console.error('Season or episode select not found');
+            return;
+          }
+
+          const season = seasonSelect.value;
+          const episode = episodeSelect.value;
+          
+          if (server === 1) {
+            streamUrl = `https://vidsrc.icu/embed/tv/${imdbId}/${season}/${episode}`;
+          } else {
+            streamUrl = `https://moviesapi.club/tv/${mediaId}-${season}-${episode}`;
+          }
+        } else {
+          if (server === 1) {
+            streamUrl = `https://vidsrc.icu/embed/movie/${imdbId}`;
+          } else {
+            streamUrl = `https://moviesapi.club/movie/${mediaId}`;
+          }
+        }
+
+        const iframe = document.createElement('iframe');
+        iframe.src = streamUrl;
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.allow = 'autoplay; fullscreen';
+        
+        videoContainer.innerHTML = '';
+        videoContainer.appendChild(iframe);
+
+      } catch (error) {
+        console.error('Error setting up video stream:', error);
+        alert('Unable to play stream. Please try another server.');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        await populateCarousel();
+        await loadMovies();
+
+        const languageSelect = document.getElementById('languageSelect');
+        languageSelect.addEventListener('change', (e) => {
+          currentLanguage = e.target.value;
+          updateLanguage();
+        });
+
+        document.getElementById('searchButton').addEventListener('click', async () => {
+          const searchQuery = document.getElementById('searchInput').value.trim();
+          if (searchQuery) {
+            const container = document.getElementById('popularMovies');
+            container.innerHTML = '';
+            displayedMediaIds.clear();
+            
+            const searchResults = await performSearch(searchQuery);
+            if (searchResults.length > 0) {
+              await displayMedia(searchResults, 'popularMovies', 'all', true);
+            } else {
+              container.innerHTML = '<p>No results found</p>';
+            }
+          }
+        });
+
+      } catch (error) {
+        console.error('Error in DOMContentLoaded:', error);
+      }
+    });
+
+    async function loadMovies() {
+      try {
+        const [popularMovies, popularTVShows] = await Promise.all([
+          fetchMedia('/movie/popular', { language: currentLanguage, page: currentPage }),
+          fetchMedia('/tv/popular', { language: currentLanguage, page: currentPage })
+        ]);
+        
+        const combinedResults = [
+          ...popularMovies.map(movie => ({...movie, media_type: 'movie'})),
+          ...popularTVShows.map(show => ({...show, media_type: 'tv'}))
+        ].sort((a, b) => b.popularity - a.popularity);
+
+        if (combinedResults.length > 0) {
+          await displayMedia(combinedResults, 'popularMovies', 'all', currentPage === 1);
+          currentPage++;
+        }
+      } catch (error) {
+        console.error('Error loading media:', error);
+      }
+    }
+
+    async function displayMedia(mediaList, containerId, mediaType, clearContainer = false) {
+      const container = document.getElementById(containerId);
+      if (clearContainer) {
+        container.innerHTML = '';
+        displayedMediaIds.clear();
+      }
+
+      mediaList.forEach(async (item) => {
+        if (displayedMediaIds.has(item.id)) {
+          return;
+        }
+
+        displayedMediaIds.add(item.id);
+        const itemMediaType = item.media_type || currentMediaType;
+
+        const mediaItem = document.createElement('div');
+        mediaItem.className = 'media-item';
+        
+        mediaItem.innerHTML = `
+          <img src="${IMAGE_BASE_URL}${item.poster_path}" alt="${item.title || item.name}">
+          <div class="rating-badge"></div>
+          <div class="media-year">${(item.release_date || item.first_air_date || '').split('-')[0]}</div>
+          <div class="media-info">
+            <h3 class="media-title">${item.title || item.name}</h3>
+            <p class="media-rating">⭐ ${item.vote_average.toFixed(1)}</p>
+          </div>
+        `;
+        mediaItem.addEventListener('click', () => openMediaDetails(item.id, itemMediaType));
+        container.appendChild(mediaItem);
+      });
+    }
+
+    document.getElementById('searchInput').addEventListener('keypress', async (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('searchButton').click();
+      }
+    });
+
+    function updateLanguage() {
+      document.querySelectorAll('[data-translate]').forEach(element => {
+        const key = element.getAttribute('data-translate');
+        if (currentLanguage === 'pt-BR' && translations['pt-BR'][key]) {
+          element.textContent = translations['pt-BR'][key];
+        } else if (currentLanguage === 'es' && translations['es'][key]) {
+          element.textContent = translations['es'][key];
+        } else {
+          element.textContent = key;
+        }
+      });
+      
+      document.getElementById('popularMovies').innerHTML = '';
+      displayedMediaIds.clear();
+
+      if (currentMediaType === 'movie') {
+        loadMovies();
+      }
+    }
+  </script>
+  <footer>
+    <strong>Design by CatFrog</strong>
+  </footer>
+</body></html>
